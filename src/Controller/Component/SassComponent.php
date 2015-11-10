@@ -1,9 +1,13 @@
 <?php
-App::uses('SassCompiler', 'SassCompiler.Lib');
-App::uses('Folder', 'Utility');
-App::uses('File', 'Utility');
-App::uses('Component', 'Controller');
-App::uses('scss.inc', 'SassCompiler.Vendor/scssphp');
+
+namespace SassCompiler\Controller\Component;
+
+use SassCompiler\Lib;
+use Cake\Filesystem\Folder;
+use Cake\Filesystem\File;
+use Cake\Controller\Component;
+use Cake\Core\Configure;
+use SassCompiler\Vendor\scssphp;
 
 /**
  * SassCompiler
@@ -123,7 +127,7 @@ class SassComponent extends Component {
  * @param ComponentCollection $collection
  * @param array               $settings
  */
-	public function __construct(ComponentCollection $collection, $settings = array()) {
+	public function __construct($collection, $settings = array()) {
 		$this->controller = $collection->getController();
 		$settings = array_merge($settings, (array)Configure::read('SassCompiler'));
 
