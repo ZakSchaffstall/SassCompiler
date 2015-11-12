@@ -1,4 +1,7 @@
 <?php
+
+namespace SassCompiler\View\Helper\SassHelper;
+
 /**
  * SassHelper
  * ===

@@ -1,6 +1,12 @@
 <?php
-App::import('Vendor', 'SassCompiler.scssphp', array('file' => 'scssphp' . DS . 'scss.inc.php'));
-App::uses('MySassImportNode', 'SassCompiler.Lib');
+namespace SassCompiler\Controller\Component;
+
+// namespace SassCompiler\vendor\SassCompiler;
+// App::import('Vendor', 'SassCompiler.scssphp', array('file' => 'scssphp' . DS . 'scss.inc.php'));
+require_once(ROOT.DS.'plugins'.DS.'SassCompiler'.DS.'vendor'.DS.'scssphp'.DS.'scss.inc.php');
+use \scssc;
+// use SassCompiler\Lib\MySassImportNode;
+// App::uses('MySassImportNode', 'SassCompiler.Lib');
 
 /**
  * SassCompiler
@@ -13,13 +19,13 @@ App::uses('MySassImportNode', 'SassCompiler.Lib');
  */
 class SassCompiler extends scssc {
 
-/**
- * Check if a (re)compile is needed
- * @param  array $in
- * @param  boolean $force
- *
- * @return array or null
- */
+	/**
+	 * Check if a (re)compile is needed
+	 * @param  array $in
+	 * @param  boolean $force
+	 *
+	 * @return array or null
+	 */
 	public function cachedCompile($in, $force = false) {
 		// assume no root
 		$root = null;
@@ -104,9 +110,9 @@ class SassCompiler extends scssc {
 	}
 
 	public function registerHelper($helperName) {
-		$helperClass = $helperName . 'Helper';
+		$helperClass = 'SassCompiler\\View\\Helper\\' .  $helperName . 'Helper';
 
-		App::uses($helperClass, 'SassCompiler.Lib/Helper');
+		// App::uses($helperClass, 'SassCompiler.Lib/Helper');
 
 		$helper = new $helperClass();
 

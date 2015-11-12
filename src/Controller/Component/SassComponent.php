@@ -2,12 +2,15 @@
 
 namespace SassCompiler\Controller\Component;
 
-use SassCompiler\Lib;
-use Cake\Filesystem\Folder;
-use Cake\Filesystem\File;
+// use SassCompiler\Lib;
+require_once(ROOT.DS.'plugins'.DS.'SassCompiler'.DS.'vendor'.DS.'SassCompiler'.DS.'SassCompiler.php');
+use Cake\Cache\Cache;
 use Cake\Controller\Component;
 use Cake\Core\Configure;
-use SassCompiler\Vendor\scssphp;
+use Cake\Event\Event;
+use Cake\Filesystem\Folder;
+use Cake\Filesystem\File;
+use SassCompiler\vendor\scssphp;
 
 /**
  * SassCompiler
@@ -28,14 +31,14 @@ class SassComponent extends Component {
  *
  * @var array
  */
-	public $settings = array(
-		'sourceFolder'		=> 'sass',						// Where to look for .scss files, (From the APP directory)
-		'targetFolder'		=> false,						// Where to put the generated css (From the webroot directory)
-		'formatter'			=> 'scss_formatter_compressed',	// PHPSass compatible style (compressed or nested)
-		'forceCompiling'	=> false,						// Always recompile
-		'autoRun'			=> false,						// Check if compilation is necessary, this ignores the CakePHP Debug setting
-		'import_paths'		=> array()						// Array of paths to search for scss files when using @import, path has to be relative to the sourceFolder
-	);
+	public $settings = array();
+	// 	'sourceFolder'		=> 'sass',						// Where to look for .scss files, (From the APP directory)
+	// 	'targetFolder'		=> false,						// Where to put the generated css (From the webroot directory)
+	// 	'formatter'			=> 'scss_formatter_compressed',	// PHPSass compatible style (compressed or nested)
+	// 	'forceCompiling'	=> false,						// Always recompile
+	// 	'autoRun'			=> false,						// Check if compilation is necessary, this ignores the CakePHP Debug setting
+	// 	'import_paths'		=> array()						// Array of paths to search for scss files when using @import, path has to be relative to the sourceFolder
+	// );
 
 /**
  * Controller instance reference
@@ -49,7 +52,7 @@ class SassComponent extends Component {
  *
  * @var array
  */
-	public $components = array('RequestHandler', 'Session');
+	public $components = array('RequestHandler');
 
 /**
  * Contains the indexed folders consisting of scss files
@@ -129,10 +132,9 @@ class SassComponent extends Component {
  */
 	public function __construct($collection, $settings = array()) {
 		$this->controller = $collection->getController();
-		$settings = array_merge($settings, (array)Configure::read('SassCompiler'));
+		$this->settings = array_merge((array)Configure::read('SassCompiler'), $settings);
 
-		parent::__construct($collection, array_merge($this->settings, (array)$settings));
-
+		parent::__construct($collection, $this->settings);
 		// Don't execute the component if the debuglevel is 0
 		// unless compileSass requestparameter is supplied
 		// if autoRun is true then ALWAYS run the component
@@ -148,8 +150,7 @@ class SassComponent extends Component {
 		}
 
 		$this->_checkVersion();
-
-		$this->cacheKey .= $this->Session->read('Config.userAgent');
+		$this->cacheKey .= $this->request->session()->read('Config.userAgent');
 
 		$this->_createCacheConfig();
 
@@ -264,20 +265,30 @@ class SassComponent extends Component {
 	}
 
 /**
+ * @TODO: Find a better way to get the classname
+ * Got this from: http://php.net/manual/en/function.get-class.php#114568
+ */
+
+private function get_class_name($classname)
+{
+    if ($pos = strrpos($classname, '\\')) return substr($classname, $pos + 1);
+    return $pos;
+}
+
+/**
  * Set all possible folders
  *
  * @return void
  */
 	protected function _setFolders() {
-		$this->_cacheFolder = CACHE . __CLASS__;
-
+		$this->_cacheFolder = CACHE . $this->get_class_name(__CLASS__);
 		$this->_sassFolders['default'] = $this->settings['sourceFolder']?
-														APP . $this->settings['sourceFolder']:
-														APP . 'sass';
+														ROOT . $this->settings['sourceFolder']:
+														ROOT . DS . 'webroot'.DS.'sass';
 
 		$this->_cssFolders['default'] = $this->settings['targetFolder']?
-														WWW_ROOT . $this->settings['targetFolder']:
-														WWW_ROOT . 'css';
+														ROOT . $this->settings['targetFolder']:
+														ROOT . DS . 'webroot'.DS.'css';
 
 		$this->_checkFolders();
 
@@ -357,7 +368,7 @@ class SassComponent extends Component {
  *
  * @return void
  */
-	public function beforeRender(Controller $controller) {
+	public function beforeRender(Event $event) {
 		$this->generateCSS();
 	}
 
@@ -378,7 +389,7 @@ class SassComponent extends Component {
  	 * - The component should run always (autorun) despite of the debuglevel
  	 */
 		if (($this->_isCacheEnabled && false === $this->_getCacheKey('sass_compiled')) ||
-			Configure::read('debug') > 0 ||
+			Configure::read('debug') ||
 			true === $this->settings['autoRun'] ||
 			true === $this->settings['forceCompiling']
 			) {
@@ -421,13 +432,14 @@ class SassComponent extends Component {
 
 		if (!self::$_instance instanceof SassCompiler) {
 			self::$_instance = new SassCompiler();
-			self::$_instance->registerHelper('CompassUrl');
-			self::$_instance->registerHelper('CompassImageDimension');
-			self::$_instance->registerHelper('CompassConstant');
-			self::$_instance->registerHelper('CompassMath');
-			self::$_instance->registerHelper('CompassFontFiles');
-			self::$_instance->registerHelper('CompassInlineData');
-			self::$_instance->registerHelper('CompassSprite');
+			// @TODO: Get Compass Helpers working
+			// self::$_instance->registerHelper('CompassUrl');
+			// self::$_instance->registerHelper('CompassImageDimension');
+			// self::$_instance->registerHelper('CompassConstant');
+			// self::$_instance->registerHelper('CompassMath');
+			// self::$_instance->registerHelper('CompassFontFiles');
+			// self::$_instance->registerHelper('CompassInlineData');
+			// self::$_instance->registerHelper('CompassSprite');
 
 			self::$_instance->setFormatter($this->settings['formatter']);
 

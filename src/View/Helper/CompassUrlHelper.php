@@ -1,7 +1,13 @@
 <?php
-App::uses('SassHelper', 'SassCompiler.Lib/Helper');
-App::uses('View', 'View');
-App::uses('Helper', 'View');
+
+namespace SassCompiler\View\Helper\CompassUrlHelper;
+
+use SassCompiler\View\Helper\SassHelper;
+// App::uses('SassHelper', 'SassCompiler.Lib/Helper');
+use Cake\View;
+// App::uses('View', 'View');
+use Cake\View\Helper;
+// App::uses('Helper', 'View');
 
 /**
  * CompassUrlHelper
