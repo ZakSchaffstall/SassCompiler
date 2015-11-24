@@ -206,6 +206,7 @@ class SassComponent extends Component {
 			if (isset($this->settings['cache'])) {
 				$cache = array_merge($cache, $this->settings['cache']);
 			}
+			Cache::drop('SassComponent');
 			Cache::config('SassComponent', $cache);
 		}
 	}
